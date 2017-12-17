@@ -10367,12 +10367,14 @@ $("#submit-global").on("click", (e) => {
 	Log.working("Sending GLOBAL Message: \"" + message + "\"")
 	chatInput.val("");
 
-	utils.fetch("POST", "/messages/global", {body: {
-		message: message
-	}}).then((res) => {
+	utils.fetch("POST", "/messages/global", {
+		body: {
+			message: message
+		}
+	}).then((res) => {
 		Log.done("Sent Global Message!")
 	}).catch((err) => {
-		Log.error(err);
+		Log.fetchError(err);
 	})
 })
 
@@ -10425,13 +10427,15 @@ exports.fetch = (method, url, data) => {
     if(!data) {data = {}}
     if(data.query) {data.query = "?" + exports.urlQuery(data.query)} else {data.query = ""}
     if(!data.head) {data.head = {}}
-    if(data.auth) {data.head["x-xsrf-token"] = getCookie("XSRF-TOKEN")}
+    if(data.auth) {data.head["x-xsrf-token"] = exports.getCookie("XSRF-TOKEN")}
+    if(data.body && typeof data.body === "object") {
+    	data.head["Content-Type"] = "application/json";
+    	data.body = JSON.stringify(data.body);
+    }
     fetch(url + data.query, {
           method: method,
-          headers: new Headers({
-            //"Content-Type": "application/json",
-            "x-xsrf-token": getCookie("XSRF-TOKEN")
-          }),
+          headers: new Headers(data.head),
+          body: data.body,
           credentials: 'same-origin'
       }).then(exports.fetchStatus).then(exports.fetchJSON).then((json) => {
         return resolve(json)
@@ -10606,6 +10610,12 @@ class Logger {
 	error(message) {
 		console.error(message);
 		this._newEntry("error", message);
+	}
+	fetchError(errorObject) {
+		console.error(errorObject);
+		var message = errorObject.response.status + " " + errorObject.message + ": " + decodeURIComponent(errorObject.response.headers.get("errormessage"))
+		console.log("FETCH ERROR:", message)
+		this._newEntry("fetch error", message);
 	}
 }
 

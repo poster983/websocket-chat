@@ -36,6 +36,7 @@ var messagesJS = require("../lib/messages.js");
 
 router.post('/global', function(req, res, next) {
   //TODO, get USER ID, PASS IT TO FUNCTION 
+  console.log(req.body)
   messagesJS.newGlobalMessage({fromID: Math.random() + "User", message: req.body.message}).then((resp) => {
   	res.json(resp).status(201);
   }).catch((err) => {
