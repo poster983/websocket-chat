@@ -5,5 +5,10 @@
 		"port": "28015",
 		"user": "admin",
 		"password": ""
+	},
+	"secrets": {
+		"session": "dskjfkasdjf45a6sdf4laj654dsfkjaksdlf",
+		"JWT": "56fgd4sdfg4324g65fd4g541fds65h456gfdz4jj56j4h56l7kj98",
+		"cookie": "fd4s65g48dfg465sdf4h98gdf4h4jh65gfs49"
 	}
 }

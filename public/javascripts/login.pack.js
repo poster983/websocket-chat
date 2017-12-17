@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -10571,7 +10571,8 @@ class Logger {
 module.exports = Logger;
 
 /***/ }),
-/* 3 */
+/* 3 */,
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -10607,23 +10608,40 @@ $(document).ready(() => {
 	Log.log("JS Loaded");
 })
 
-
-$("#submit-global").on("click", (e) => {
-	var chatInput = $("#chat-input");
-	var message = chatInput.val();
-	Log.working("Sending GLOBAL Message: \"" + message + "\"")
+$("#create-user").on("click", (e) => {
+	var chatInput = $("#username");
+	var username = chatInput.val();
+	Log.working("Creating new account: \"" + username + "\"")
 	chatInput.val("");
 
-	utils.fetch("POST", "/messages/global", {
+	utils.fetch("POST", "/accounts/", {
 		body: {
-			message: message
+			username: username
 		}
 	}).then((res) => {
-		Log.done("Sent Global Message!")
+		Log.done("Created Account!")
 	}).catch((err) => {
 		Log.fetchError(err);
 	})
 })
+
+$(".login-buttons").on("click", (e) => {
+	var element = $(e.target);
+	Log.working("Logging in user: \"" + element.attr("data-username") + "\"")
+	utils.fetch("POST", "/auth/login", {
+		body: {
+			username: element.attr("data-username")
+		}
+	}).then((res) => {
+		Log.done("Logged In!")
+		window.location.replace("/")
+	}).catch((err) => {
+		Log.fetchError(err);
+	})
+})
+
+
+
 
 /***/ })
 /******/ ]);

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+    
+    <input type="text" placeholder="Username" name="username" id="username">
+    <button id="create-user">Create New User</button>
+    <h5>User List</h5>
+    <div id="user-list"> 
+        <ul>
+            <% for(var i=0; i<accounts.length; i++) {%>
+                <li><button class="login-buttons" data-username="<%= accounts[i].username %>">Login as <%= accounts[i].username %></button></li>
+            <% } %>
+        </ul>
+    </div>
+
+    <h5> Console Log </h5>
+    <div id="console-log">
+    </div>
+    <script type="text/javascript" src="javascripts/login.pack.js"></script>
+  </body>
+</html>
