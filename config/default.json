@@ -1,0 +1,9 @@
+{
+	"rethinkdb": {
+		"database": "websocketChat",
+		"host": "localhost",
+		"port": "28015",
+		"user": "admin",
+		"password": ""
+	}
+}

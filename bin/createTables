@@ -1,0 +1,80 @@
+#!/usr/bin/env node
+/*
+MIT License
+
+Copyright (c) 2017 Joseph Hassell
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+var config = require("config");
+var util = require("util");
+var r = require('rethinkdbdash')({
+	servers: [{host: config.get("rethinkdb.host"), port: config.get("rethinkdb.port")}],
+	user: config.get("rethinkdb.user"),
+	password: config.get("rethinkdb.password")
+});
+
+
+r.dbList().run().then((dbArr) => {
+	new Promise((resolve, reject) => {
+      if(dbArr.includes(config.get('rethinkdb.database'))) {
+        return resolve(false);
+      } else {
+        r.dbCreate(config.get('rethinkdb.database')).run().then(() => {
+          return resolve(true);
+        }).catch((err) => {
+          return reject(err);
+        })
+      }
+    }).then((dbRes) => {
+		if(dbRes) {
+	      console.log("Database \"" + config.get('rethinkdb.database') + "\" created.");
+	    } else {
+	      console.log("Database \"" + config.get('rethinkdb.database') + "\" exists, skipping.");
+	    }
+	    r.db(config.get('rethinkdb.database')).tableList().run().then((tables) => {
+            //console.log(tables)
+            var tableArr = [];
+
+            if(!tables.includes("accounts")) {
+              tableArr.push(r.db(config.get('rethinkdb.database')).tableCreate('accounts').run());
+            }
+            if(!tables.includes("messages")) {
+              tableArr.push(r.db(config.get('rethinkdb.database')).tableCreate('messages').run());
+            }
+            if(!tables.includes("sockets")) {
+              tableArr.push(r.db(config.get('rethinkdb.database')).tableCreate('sockets').run());
+            }
+
+            Promise.all(tableArr).then((results) => {
+              console.log("Success!");
+              if(results.length == 0) {
+                console.log("Nothing Changed ");
+              } else {
+                console.log(util.inspect(results, {showHidden: false, depth: null}))
+              }
+            }).catch((err) => {
+              console.log("ERROR!");
+              throw err;
+              process.exit();
+            })
+        }).catch((err) => {throw err; process.exit();})
+    }).catch((err) => {throw err; process.exit();})
+
+}).catch((err) => {throw err; process.exit();})
