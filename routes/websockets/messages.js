@@ -22,3 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+var r = require("../../lib/db.js").r();
+
+
+//Routing
+exports.global = (ws, req) => {
+	//r.
+}

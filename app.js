@@ -22,7 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 var express = require('express');
+const WebSocket = require('ws');
 var path = require('path');
+var url = require('url');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -31,13 +33,18 @@ var passport = require('passport')
 var cookieSession = require("cookie-session")
 var utils = require("./lib/utils.js")
 var config = require('config');
+
 require("./lib/passportStrat.js")
+
 var index = require('./routes/index');
 var accounts = require('./routes/accounts');
 var messages = require('./routes/messages');
 var auth = require('./routes/auth');
 
+/** SERVER **/
 var app = express();
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -86,4 +93,40 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+/** Server Stuff **/
+var server = require('http').Server(app);
+const wss = new WebSocket.Server({ server });
+
+/** WS Routes **/
+var messagesWS = require("./routes/websockets/messages");
+
+wss.on('connection', function connection(ws, req) {
+  const location = url.parse(req.url, true);
+  // You might use location.query.access_token to authenticate or share sessions
+  // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
+  console.log("User Connected")
+  console.log(location)
+  
+
+  ws.on('message', function incoming(message) {
+    console.log('received: %s', message);
+    ws.send('received: ' + message);
+  });
+
+  ws.send('something');
+
+  /** Initial Routeing.  (Equivalent to app.use('/', index);) **/
+  //TODO 
+  switch(location.path) {
+    case "/messages/global": 
+    case "/messages/global/": 
+      messagesWS.global(ws, req);
+      break;
+    default: 
+      ws.close()
+      break;
+  }
+  
+});
+
+module.exports = {app: app, server: server};
